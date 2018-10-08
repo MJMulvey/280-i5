@@ -16,7 +16,6 @@ CREATE TABLE Operator (
     license             TINYINT NOT NULL,
     rescueEndorsement   TINYINT NOT NULL,
     operations          SMALLINT NOT NULL,
-    /* UNIQUE ADDED SINCE SUBMISSION */
     droneID             INT UNIQUE,
 
     PRIMARY KEY (id)
@@ -28,7 +27,6 @@ CREATE TABLE Drone (
     name                VARCHAR(100) NOT NULL,
     class               TINYINT NOT NULL,
     rescue              TINYINT NOT NULL,
-    /* UNIQUE ADDED SINCE SUBMISSION */
     operatorID          INT UNIQUE,
     mapID               INT,
 
