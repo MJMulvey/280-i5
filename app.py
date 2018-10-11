@@ -6,7 +6,8 @@ import ttk
 
 from drones import Drone, DroneStore
 from operators import Operator, OperatorStore
-
+from trackingsystem import TrackingSystem, DroneLocation
+from maps import Map, MapStore
 
 class Application(object):
     """ Main application view - displays the menu. """
@@ -15,6 +16,8 @@ class Application(object):
         # Initialise the stores
         self.drones = DroneStore(conn)
         self.operators = OperatorStore(conn)
+        self.tracking = TrackingSystem()
+        self.maps = MapStore(conn)
 
         # Initialise the GUI window
         self.root = tk.Tk()
@@ -29,6 +32,9 @@ class Application(object):
         operator_button = tk.Button(
             frame, text="View Operators", command=self.view_operators, width=40, padx=5, pady=5)
         operator_button.pack(side=tk.TOP)
+        map_button = tk.Button(
+            frame, text="View Map", command=self.view_map, width=40, padx=5, pady=5)
+        map_button.pack(side=tk.TOP)
         exit_button = tk.Button(frame, text="Exit System",
                                 command=quit, width=40, padx=5, pady=5)
         exit_button.pack(side=tk.TOP)
@@ -47,6 +53,15 @@ class Application(object):
         wnd = DroneListWindow(self)
         self.root.wait_window(wnd.root)
 
+    def view_map(self):
+        """ Display the maps. """
+        wnd = MapWindow(self)
+        self.root.wait_window(wnd.root)
+
+class MapWindow(object):
+    """ Window to view maps """
+
+    def __init__(self, parent, )
 
 class ListWindow(object):
     """ Base list window. """
@@ -55,6 +70,8 @@ class ListWindow(object):
         # Add a variable to hold the stores
         self.drones = parent.drones
         self.operators = parent.operators
+        self.tracking = parent.tracking
+        self.maps = parent.maps
 
         # Initialise the new top-level window (modal dialog)
         self._parent = parent.root
@@ -122,7 +139,7 @@ class DroneListWindow(ListWindow):
             self.tree.insert('', 'end', values=(drone.id, drone.name, drone.class_type, drone.rescue, drone.operator))
 
     def add_drone(self):
-        """ Starts a new drone and displays it in the list. """
+        """ Starts a new drone and displays it in the list."""
         # Start a new drone instance
         drone = Drone()
         
@@ -225,6 +242,9 @@ class EditorWindow(object):
 
     def __init__(self, parent, title, save_action):
         # Initialise the new top-level window (modal dialog)
+        self.tracking = parent.tracking
+        self.maps = parent.maps
+
         self._parent = parent.root
         self.root = tk.Toplevel(parent.root)
         self.root.title(title)
@@ -275,6 +295,8 @@ class DroneEditorWindow(EditorWindow):
         tk.name = tk.StringVar()
         tk.classString = tk.StringVar()
         tk.rescueString = tk.StringVar()
+        droneMap = self.maps.get(self._drone.map)
+        self._drone.location = self.tracking.retrieve(droneMap, self._drone)
 
         add_label_name = tk.Label(self.frame, text="Name:", padx=15, pady=5).grid(in_=self.frame, row=0, column=0, sticky=tk.W)
 
@@ -294,8 +316,19 @@ class DroneEditorWindow(EditorWindow):
         add_menu_rescue = ttk.Combobox(self.frame, values=("Yes","No"), textvariable=tk.rescueString)
         add_menu_rescue.insert(tk.END, self._drone.rescue)
         add_menu_rescue.grid(in_=self.frame, row=2, column=1, sticky=tk.W)
+
+        add_label_location = tk.Label(self.frame, text="Location", padx=15, pady=5).grid(in_=self.frame, row=3, column=0, sticky=tk.W)
         
-        return 2
+        add_location = tk.Entry(self.frame, width=50)
+        if (self._drone.location.is_valid()):
+            drone_position = self._drone.location.position()
+            add_location.insert(tk.END, "(" + str(drone_position[0]) + ", " + str(drone_position[1]) + ")")
+        else:
+            add_location.insert(tk.END, "n/a")
+        add_location.configure(state='readonly')
+        add_location.grid(in_=self.frame, row=3, column=1, sticky=tk.W)
+        
+        return 3
 
     def save_drone(self):
         """ Updates the drone details and calls the save action. """

@@ -1,7 +1,7 @@
 class Drone(object):
     """ Stores details on a drone. """
 
-    def __init__(self, id=-1, name="<new>", class_type=1, rescue="No", operator="<None>"):
+    def __init__(self, id=-1, name="<new>", class_type=1, rescue="No", operator="<None>", mapID=-1):
         self.id = id
         self.name = name
         if (class_type == 1):
@@ -12,6 +12,8 @@ class Drone(object):
             self.class_type = "Invalid Class"
         self.rescue = rescue
         self.operator = operator
+        self.location = (0, 0)
+        self.map = mapID
 
 
 class DroneAction(object):
@@ -49,10 +51,10 @@ class DroneStore(object):
         self._conn = conn
         if (self._conn != None):
             cursor = conn.cursor()
-            query = "SELECT d.id, d.name, d.class, CASE WHEN d.rescue = 1 THEN 'Yes' ELSE 'No' END AS rescue, IFNULL(op.firstName, '<None>'), IFNULL(op.lastName, '') FROM Drone d LEFT OUTER JOIN Operator op ON d.operatorID = op.id"
+            query = "SELECT d.id, d.name, d.class, CASE WHEN d.rescue = 1 THEN 'Yes' ELSE 'No' END AS rescue, IFNULL(op.firstName, '<None>'), IFNULL(op.lastName, ''), d.mapID FROM Drone d LEFT OUTER JOIN Operator op ON d.operatorID = op.id"
             cursor.execute(query)
-            for (id, name, classStr, rescue, opName1, opName2) in cursor:
-                drone = Drone(id, name, classStr, rescue, opName1 + " " + opName2)
+            for (id, name, classStr, rescue, opName1, opName2, mapID) in cursor:
+                drone = Drone(id, name, classStr, rescue, opName1 + " " + opName2, mapID)
                 self.add(drone)
             cursor.close()
 
