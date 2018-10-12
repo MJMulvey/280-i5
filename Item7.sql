@@ -15,13 +15,14 @@ INSERT INTO Operator (id, firstName, lastName, dateOfBirth, license, rescueEndor
 /* Inserts the data for the unallocated drone into the Drone table */
 INSERT INTO Drone (id, name, class, rescue)
     VALUES
-    (1, "Drone1", 1, 0);
+    (1, "Drone1", 1, 0),
+    (2, "Drone2", 2, 0),
+    (3, "Drone3", 2, 1);
 
 /* Inserts the data for the four allocated drones into the Drone table */
 INSERT INTO Drone (id, name, class, rescue, operatorID, mapID)
     VALUES
-    (2, "Drone2", 2, 0, 3, 1),
-    (3, "Drone3", 2, 1, 1, 2),
+
     (4, "Drone4", 2, 1, 4, 1),
     (5, "Drone5", 1, 0, 2, 2);
 

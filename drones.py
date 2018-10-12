@@ -12,7 +12,7 @@ class Drone(object):
             self.class_type = "Invalid Class"
         self.rescue = rescue
         self.operator = operator
-        self.location = (0, 0)
+        self.location = (0,0)
         self.map = mapID
 
 
@@ -78,6 +78,14 @@ class DroneStore(object):
             return None
         else:
             return self._drones[id]
+
+    def list_by_map(self, mapID):
+        drones_list =[]
+        for key in self._drones:
+            drone = self._drones[key]
+            if (drone.map == mapID):
+                drones_list.append(drone)
+        return drones_list
 
     def list_all(self):
         """ Lists all the drones in the system. """

@@ -65,6 +65,8 @@ class MapWindow(object):
         
         # Add a variable to hold the stores
         self.maps = parent.maps
+        self.drones = parent.drones
+        self.tracking = parent.tracking
 
         map_names = self.maps.list_all()
 
@@ -111,7 +113,7 @@ class MapWindow(object):
         self.initialise_map(tk.mapString.get())
         self.add_menu.bind('<<ComboboxSelected>>', self.display_map)
 
-        exit_button = tk.Button(self.frame, text="Refresh", command=self.close, width=20, padx=5, pady=5)
+        exit_button = tk.Button(self.frame, text="Refresh", command=self.initialise_map(tk.mapString.get()), width=20, padx=5, pady=5)
         exit_button.grid(in_=self.frame, row=3, column=0, sticky=tk.E)
 
         exit_button = tk.Button(self.frame, text="Close", command=self.close, width=20, padx=5, pady=5)
@@ -120,16 +122,45 @@ class MapWindow(object):
     def initialise_map(self, mapName):
         """ Displays the selected map in the canvas. """
         self.map = self.maps.getByName(mapName)
+        mapID = self.map.id
         self.canvas.img = tk.PhotoImage(file=self.map.filepath)
         self.canvas.create_image(0, 0, image=self.canvas.img, anchor=tk.NW)
+        
+        dronesList = self.drones.list_by_map(mapID)
+
+        for drone in dronesList:
+            droneMap = self.maps.get(drone.map)
+            drone.location = self.tracking.retrieve(droneMap, drone)
+            position = drone.location.position()
+            xpos = position[0] * (self.canvas.img.width() / 100)
+            ypos = position[1] * (self.canvas.img.height() / 100)
+            if (drone.rescue == "Yes"):
+                self.canvas.create_oval(xpos - 10, ypos - 10, xpos + 10, ypos + 10, fill='blue')
+            else:
+                self.canvas.create_oval(xpos - 10, ypos - 10, xpos + 10, ypos + 10, fill='red')
     
     def display_map(self, event):
-        self.canvas.delete("all")
+        """ Updates the map to match the combobox selection. """
+        #self.canvas.delete("all")
         mapName = tk.mapString.get()
         self.map = self.maps.getByName(mapName)
+        mapID = self.map.id
         self.canvas.img = tk.PhotoImage(file=self.map.filepath)
         self.canvas.create_image(0, 0, image=self.canvas.img, anchor=tk.NW)
         self.canvas.config(xscrollcommand=self.horizontal_scroll.set, yscrollcommand=self.vertical_scroll.set, scrollregion=(0,0, self.canvas.img.width(), self.canvas.img.height()))
+
+        dronesList = self.drones.list_by_map(mapID)
+        
+        for drone in dronesList:
+            droneMap = self.maps.get(drone.map)
+            drone.location = self.tracking.retrieve(droneMap, drone)
+            position = drone.location.position()
+            xpos = position[0] * (self.canvas.img.width() / 100)
+            ypos = position[1] * (self.canvas.img.height() / 100)
+            if (drone.rescue == "Yes"):
+                self.canvas.create_oval(xpos - 10, ypos - 10, xpos + 10, ypos + 10, fill='blue')
+            else:
+                self.canvas.create_oval(xpos - 10, ypos - 10, xpos + 10, ypos + 10, fill='red')
 
     def close(self):
         """ Closes the map window. """
