@@ -61,7 +61,76 @@ class Application(object):
 class MapWindow(object):
     """ Window to view maps """
 
-    def __init__(self, parent, )
+    def __init__(self, parent):
+        
+        # Add a variable to hold the stores
+        self.maps = parent.maps
+
+        map_names = self.maps.list_all()
+
+        # Initialise the new top-level window (modal dialog)
+        self._parent = parent.root
+        self.root = tk.Toplevel(parent.root)
+        self.root.title("Map Viewer")
+        self.root.transient(parent.root)
+        self.root.grab_set()
+
+        # Initialise the top level frame
+        self.frame = tk.Frame(self.root)
+        self.frame.pack(side=tk.TOP, fill=tk.BOTH,
+                        expand=tk.Y, padx=10, pady=10)
+
+        # Add in the widgets
+        tk.mapString = tk.StringVar()
+        
+        top_frame = tk.Frame(self.root, width=500, height=100)
+        top_frame.grid(in_=self.frame, row=0, column=0, sticky=tk.W)
+
+        add_label = tk.Label(top_frame, text="Map:", padx=15, pady=5)
+        add_label.grid(in_=top_frame, row=0, column=0, sticky=tk.W)
+
+        self.add_menu = ttk.Combobox(top_frame, values=(map_names), width=50, textvariable=tk.mapString)
+        self.add_menu.insert(tk.END, map_names[0])
+        self.add_menu.grid(in_=top_frame, row=0, column=1, sticky=tk.W)
+        
+        self.canvas = tk.Canvas(self.frame, width=500, height=500)
+        self.canvas.grid(in_=self.frame, row=1, column=0, sticky=tk.W)
+
+        self.horizontal_scroll = tk.Scrollbar(self.frame, orient=tk.HORIZONTAL, command=self.canvas.xview)
+        self.vertical_scroll = tk.Scrollbar(self.frame, orient=tk.VERTICAL, command=self.canvas.yview)
+
+        mapName = tk.mapString.get()
+        self.map = self.maps.getByName(mapName)
+        self.canvas.img = tk.PhotoImage(file=self.map.filepath)
+
+        self.canvas.config(xscrollcommand=self.horizontal_scroll.set, yscrollcommand=self.vertical_scroll.set, scrollregion=(0,0, self.canvas.img.width(), self.canvas.img.height()))
+
+        self.horizontal_scroll.grid(in_=self.frame, row=2, column=0, columnspan=3, sticky=tk.EW)
+        self.vertical_scroll.grid(in_=self.frame, row=1, column=2, sticky=tk.NS)
+
+        self.initialise_map(tk.mapString.get())
+        self.add_menu.bind('<<ComboboxSelected>>', self.display_map)
+
+        exit_button = tk.Button(self.frame, text="Close", command=self.close, width=20, padx=5, pady=5)
+        exit_button.grid(in_=self.frame, row=3, column=0, sticky=tk.E)
+
+    def initialise_map(self, mapName):
+        """ Displays the selected map in the canvas. """
+        self.map = self.maps.getByName(mapName)
+        self.canvas.img = tk.PhotoImage(file=self.map.filepath)
+        self.canvas.create_image(0, 0, image=self.canvas.img, anchor=tk.NW)
+    
+    def display_map(self, event):
+        self.canvas.delete("all")
+        mapName = tk.mapString.get()
+        self.map = self.maps.getByName(mapName)
+        self.canvas.img = tk.PhotoImage(file=self.map.filepath)
+        self.canvas.create_image(0, 0, image=self.canvas.img, anchor=tk.NW)
+        self.canvas.config(xscrollcommand=self.horizontal_scroll.set, yscrollcommand=self.vertical_scroll.set, scrollregion=(0,0, self.canvas.img.width(), self.canvas.img.height()))
+
+    def close(self):
+        """ Closes the map window. """
+        self.root.destroy()
 
 class ListWindow(object):
     """ Base list window. """

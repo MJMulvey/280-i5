@@ -43,12 +43,20 @@ class MapStore(object):
         else:
             return self._maps[id]
 
-    def list_all(self):
-        """ Lists all the maps in the store. """
-        id_list = []
+    def getByName(self, name):
+        """ Retrives a map from the store by its name. """
         for key in self._maps:
-            name_list.append(key)
-        return id_list
+            map = self._maps[key]
+            if (name == map.name):
+                return map
+        return None
+
+    def list_all(self):
+        """ Lists the names of all the maps in the store. """
+        name_list = []
+        for key in self._maps:
+            name_list.append(self._maps[key].name)
+        return name_list
 
     def save(self):
         """ Saves the store to the database. """
