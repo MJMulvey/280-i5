@@ -93,7 +93,7 @@ class MapWindow(object):
         self.add_menu.insert(tk.END, map_names[0])
         self.add_menu.grid(in_=top_frame, row=0, column=1, sticky=tk.W)
         
-        self.canvas = tk.Canvas(self.frame, width=500, height=500)
+        self.canvas = tk.Canvas(self.frame, width=600, height=400)
         self.canvas.grid(in_=self.frame, row=1, column=0, sticky=tk.W)
 
         self.horizontal_scroll = tk.Scrollbar(self.frame, orient=tk.HORIZONTAL, command=self.canvas.xview)
@@ -105,14 +105,17 @@ class MapWindow(object):
 
         self.canvas.config(xscrollcommand=self.horizontal_scroll.set, yscrollcommand=self.vertical_scroll.set, scrollregion=(0,0, self.canvas.img.width(), self.canvas.img.height()))
 
-        self.horizontal_scroll.grid(in_=self.frame, row=2, column=0, columnspan=3, sticky=tk.EW)
+        self.horizontal_scroll.grid(in_=self.frame, row=2, column=0, columnspan=2, sticky=tk.EW)
         self.vertical_scroll.grid(in_=self.frame, row=1, column=2, sticky=tk.NS)
 
         self.initialise_map(tk.mapString.get())
         self.add_menu.bind('<<ComboboxSelected>>', self.display_map)
 
-        exit_button = tk.Button(self.frame, text="Close", command=self.close, width=20, padx=5, pady=5)
+        exit_button = tk.Button(self.frame, text="Refresh", command=self.close, width=20, padx=5, pady=5)
         exit_button.grid(in_=self.frame, row=3, column=0, sticky=tk.E)
+
+        exit_button = tk.Button(self.frame, text="Close", command=self.close, width=20, padx=5, pady=5)
+        exit_button.grid(in_=self.frame, row=4, column=0, sticky=tk.E)
 
     def initialise_map(self, mapName):
         """ Displays the selected map in the canvas. """
